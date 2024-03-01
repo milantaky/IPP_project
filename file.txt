@@ -1,7 +1,3 @@
 .IPPcode24
-kajcbka jsbckjab vkjc
-cs d
-vw
-dv d
-sd
-vwsd vsdvs dvsd
+createframe
+popframe
