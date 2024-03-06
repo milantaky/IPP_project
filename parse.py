@@ -28,12 +28,12 @@ def removeComments(line):
     newList = []
     for item in line:
         if '#' in item:
-            if item[0] == '#' or item == '#': return newList 
-            else: 
+            if item[0] == '#' or item == '#': return newList
+            else:
                 item = item.split('#', 1)
                 newList.append(item[0])
                 break
-        else: 
+        else:
             newList.append(item)
     return newList
 
@@ -44,32 +44,31 @@ def checkInstructionArgsCount(line):
     match numOfArgs:
         case 1:
             if instruction in ('createframe', 'pushframe', 'popframe', 'return', 'break'):                  # Bez argumentu
-                print(instruction)
                 writeInstructionToXML(instruction, None)
             else:
                 print('Invalid instruction name or usage', file=sys.stderr)
-                sys.exit(22)
+                sys.exit(23)
         case 2:
             if instruction in ('defvar', 'call', 'pushs', 'pops', 'write', 'label', 'jump', 'dprint'):      # S 1 argumentem
                 writeInstructionToXML(instruction, line[1:])
             else:
                 print('Invalid instruction name or usage', file=sys.stderr)
-                sys.exit(22)
+                sys.exit(23)
         case 3:
             if instruction in ('move', 'int2char', 'strlen', 'type', 'read'):      # Se 2 argumenty
                 writeInstructionToXML(instruction, line[1:])
             else:
                 print('Invalid instruction name or usage', file=sys.stderr)
-                sys.exit(22)
+                sys.exit(23)
         case 4:
             if instruction in ('add', 'sub', 'mul', 'idiv', 'lt', 'gt', 'eq', 'and', 'or', 'not', 'stri2int', 'concat', 'getchar', 'setchar', 'jumpifeq', 'jumpifneq'):      # Se 3 argumenty
                 writeInstructionToXML(instruction, line[1:])
             else:
                 print('Invalid instruction name or usage', file=sys.stderr)
-                sys.exit(22)
+                sys.exit(23)
         case _:
             print('Too many arguments in instruction', file=sys.stderr)
-            sys.exit(22)
+            sys.exit(23)
 
 def writeInstructionToXML(name, args):
     global orderNum
@@ -81,8 +80,7 @@ def writeInstructionToXML(name, args):
     args = checkArguments(name, args)  # Pokud chyba v argumentech, dal to nedojde
 
     if args != None and len(args) > 0:
-        for index, arg in enumerate(args):   
-            print(index, arg)
+        for index, arg in enumerate(args):
             argumentElement = ET.Element('arg' + str(index + 1), type=str(arg[0]))
             argumentElement.text = arg[1]
             instruction.append(argumentElement)
@@ -100,55 +98,55 @@ def checkArguments(name, args):
             if name in ('defvar', 'pops'):                      # <var>
                 check = [isVar(args[0])]
                 if False in check:
-                    print('Incorrect argument:', args , file=sys.stderr)  
-                    sys.exit(22)
-                else: 
-                    print("OK")
+                    print('Incorrect argument:', args , file=sys.stderr)
+                    sys.exit(23)
+                # else:
+                #     print("OK")
             elif name in ('pushs', 'write', 'exit', 'dprint'):  # <symb>
                 check = [isSymb(args[0])]
                 if False in check:
-                    print('Incorrect argument:', args , file=sys.stderr)  
-                    sys.exit(22)
-                else: 
-                    print("OK")
-            else:                                               # <label>                   'call', 'label', 'jump'  
+                    print('Incorrect argument:', args , file=sys.stderr)
+                    sys.exit(23)
+                # else:
+                #     print("OK")
+            else:                                               # <label>                   'call', 'label', 'jump'
                 check = [isLabel(args[0])]
-                if False in check:   
-                    print('Incorrect argument:', args , file=sys.stderr)  
-                    sys.exit(22)
-                else: 
-                    print("OK")
+                if False in check:
+                    print('Incorrect argument:', args , file=sys.stderr)
+                    sys.exit(23)
+                # else:
+                #     print("OK")
         case 2:
             if name in ('move', 'int2char', 'strlen', 'type'):  # <var><symb>
                 check = [isVar(args[0]), isSymb(args[1])]
                 if False in check:
-                    print('Incorrect argument:', args , file=sys.stderr)  
-                    sys.exit(22)
-                else: 
-                    print("OK")
+                    print('Incorrect argument:', args , file=sys.stderr)
+                    sys.exit(23)
+                # else:
+                #     print("OK")
             else:                                               # <var><type>               'read'
                 check = [isVar(args[0]), isType(args[1])]
                 if False in check:
-                    print('Incorrect argument:', args , file=sys.stderr)  
-                    sys.exit(22)
-                else: 
-                    print("OK")
+                    print('Incorrect argument:', args , file=sys.stderr)
+                    sys.exit(23)
+                # else:
+                #     print("OK")
 
         case 3:
             if name in ('jumpifeq', 'jumpifneq'):               # <label><symb1><symb2>
                 check = [isLabel(args[0]), isSymb(args[1]), isSymb(args[2])]
                 if False in check:
-                    print('Incorrect argument:', args , file=sys.stderr)  
-                    sys.exit(22)
-                else: 
-                    print("OK")
+                    print('Incorrect argument:', args , file=sys.stderr)
+                    sys.exit(23)
+                # else:
+                #     print("OK")
             else:                                               # <var><symb1><symb2>       'add', 'sub', 'mul', 'idiv', 'lt', 'gt', 'eq', 'and', 'or', 'not', 'stri2int', 'concat', 'getchar', 'setchar'
                 check = [isVar(args[0]), isSymb(args[1]), isSymb(args[2])]
                 if False in check:
-                    print('Incorrect argument:', args , file=sys.stderr)  
-                    sys.exit(22)
-                else: 
-                    print("OK")
+                    print('Incorrect argument:', args , file=sys.stderr)
+                    sys.exit(23)
+                # else:
+                #     print("OK")
 
         # 4 ani default neni potreb, to je osetreno ve funkci checkInstructionArgsCount
     return check
@@ -163,7 +161,7 @@ def isVar(arg):
     if arg[0] not in ('GF', 'LF', 'TF'): return False
     
     if isValidName(arg[1]): return ['var', saved]
-    return False    
+    return False
 
 # konstanta int,bool,...@..
 # muze byt i promenna
@@ -202,7 +200,7 @@ def isLabel(arg):
     if isValidName(arg): return ['label', arg]
 
 def isType(arg):
-    if arg in ('int', 'string', 'bool'): return ['type', arg] 
+    if arg in ('int', 'string', 'bool'): return ['type', arg]
 
 def isValidName(name):
     # Je potreba udelat to pro prvni zvlast
@@ -230,13 +228,13 @@ if header.lower() != '.ippcode24':
 
 # TODO Vytvorit XML hlavicku
 xmlRoot = ET.Element('program', language='IPPcode24')
-# print(xmlRoot)
+print('<?xml version="1.0" encoding="UTF-8"?>')
 
 # Zpracovani radku souboru ze vstupu
-for line in sys.stdin:   
+for line in sys.stdin:
     readLine = sanitizeLine(line)
     if len(readLine) == 0: continue
-    print(readLine)
+    # print(readLine)
     checkInstructionArgsCount(readLine)
     # writeInstructionToXML(line) ???
 
@@ -244,8 +242,3 @@ for line in sys.stdin:
 tree = ET.ElementTree(xmlRoot)
 # tree.write('test.xml')
 ET.dump(tree)
-
-
-
-
-print("POHODINDA!")
