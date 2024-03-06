@@ -80,19 +80,22 @@ def writeInstructionToXML(name, args):
 
     args = checkArguments(name, args)  # Pokud chyba v argumentech, dal to nedojde
 
-    # if args != None and len(args) > 0:
-    #     for arg in args:
-    #         # print('juhu ', arg)
+    if args != None and len(args) > 0:
+        for index, arg in enumerate(args):   
+            print(index, arg)
+            argumentElement = ET.Element('arg' + str(index + 1), type=str(arg[0]))
+            argumentElement.text = arg[1]
+            instruction.append(argumentElement)
 
-
-    for index, item in enumerate(args):      #budu vedet i index (kdyz tam bude konstanta, muzu se podivat, jestli tam muze byt (symb))
-        print(index, item)
 
 def checkArguments(name, args):
-    numOfArgs = len(args)
+    numOfArgs = 0
     check = None
+    if name not in ('createframe', 'pushframe', 'popframe', 'return', 'break'): numOfArgs = len(args)
 
     match numOfArgs:
+        case 0:
+            return None
         case 1:
             if name in ('defvar', 'pops'):                      # <var>
                 check = [isVar(args[0])]
@@ -199,7 +202,7 @@ def isLabel(arg):
     if isValidName(arg): return ['label', arg]
 
 def isType(arg):
-    return arg in ('int', 'string', 'bool')
+    if arg in ('int', 'string', 'bool'): return ['type', arg] 
 
 def isValidName(name):
     # Je potreba udelat to pro prvni zvlast
@@ -240,7 +243,7 @@ for line in sys.stdin:
 
 tree = ET.ElementTree(xmlRoot)
 # tree.write('test.xml')
-# ET.dump(tree)
+ET.dump(tree)
 
 
 
