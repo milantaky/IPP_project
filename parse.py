@@ -43,7 +43,6 @@ def checkInstructionArgsCount(line):
 
     match numOfArgs:
         case 1:
-            # if instruction in noArg:
             if instruction in ('createframe', 'pushframe', 'popframe', 'return', 'break'):                  # Bez argumentu
                 print(instruction)
                 writeInstructionToXML(instruction, None)
@@ -52,21 +51,18 @@ def checkInstructionArgsCount(line):
                 sys.exit(22)
         case 2:
             if instruction in ('defvar', 'call', 'pushs', 'pops', 'write', 'label', 'jump', 'dprint'):      # S 1 argumentem
-                print(instruction, " + 1 operand")
                 writeInstructionToXML(instruction, line[1:])
             else:
                 print('Invalid instruction name or usage', file=sys.stderr)
                 sys.exit(22)
         case 3:
             if instruction in ('move', 'int2char', 'strlen', 'type', 'read'):      # Se 2 argumenty
-                print(instruction, " + 2 operandy")
                 writeInstructionToXML(instruction, line[1:])
             else:
                 print('Invalid instruction name or usage', file=sys.stderr)
                 sys.exit(22)
         case 4:
             if instruction in ('add', 'sub', 'mul', 'idiv', 'lt', 'gt', 'eq', 'and', 'or', 'not', 'stri2int', 'concat', 'getchar', 'setchar', 'jumpifeq', 'jumpifneq'):      # Se 3 argumenty
-                print(instruction, " + 3 operandy")
                 writeInstructionToXML(instruction, line[1:])
             else:
                 print('Invalid instruction name or usage', file=sys.stderr)
@@ -82,52 +78,54 @@ def writeInstructionToXML(name, args):
     xmlRoot.append(instruction)
     orderNum += 1
 
-    checkArguments(name, args)  # Pokud chyba v argumentech, dal to nedojde
+    args = checkArguments(name, args)  # Pokud chyba v argumentech, dal to nedojde
 
     # if args != None and len(args) > 0:
     #     for arg in args:
     #         # print('juhu ', arg)
 
 
-    #         # for index, item in enumerate(items):      budu vedet i index (kdyz tam bude konstanta, muzu se podivat, jestli tam muze byt (symb))
-    #         #     print(index, item)
+    for index, item in enumerate(args):      #budu vedet i index (kdyz tam bude konstanta, muzu se podivat, jestli tam muze byt (symb))
+        print(index, item)
 
-
-# konstanta int,bool,...@..
-# label ...
-# musi to zacinat _, -, $, &, %, *, !, ?, nebo pismenem
 def checkArguments(name, args):
     numOfArgs = len(args)
+    check = None
 
     match numOfArgs:
         case 1:
             if name in ('defvar', 'pops'):                      # <var>
-                if not isVar(args[0]):
+                check = [isVar(args[0])]
+                if False in check:
                     print('Incorrect argument:', args , file=sys.stderr)  
                     sys.exit(22)
                 else: 
                     print("OK")
             elif name in ('pushs', 'write', 'exit', 'dprint'):  # <symb>
-                if not isSymb(args[0]):
+                check = [isSymb(args[0])]
+                if False in check:
                     print('Incorrect argument:', args , file=sys.stderr)  
                     sys.exit(22)
                 else: 
                     print("OK")
-            else:                                               # <label>                   'call', 'label', 'jump'     
-                if not isLabel(args[0]):
+            else:                                               # <label>                   'call', 'label', 'jump'  
+                check = [isLabel(args[0])]
+                if False in check:   
                     print('Incorrect argument:', args , file=sys.stderr)  
                     sys.exit(22)
                 else: 
                     print("OK")
         case 2:
             if name in ('move', 'int2char', 'strlen', 'type'):  # <var><symb>
-                if not isVar(args[0]) or not isSymb(args[1]):
+                check = [isVar(args[0]), isSymb(args[1])]
+                if False in check:
                     print('Incorrect argument:', args , file=sys.stderr)  
                     sys.exit(22)
                 else: 
                     print("OK")
             else:                                               # <var><type>               'read'
-                if not isVar(args[0]) or not isType(args[1]):
+                check = [isVar(args[0]), isType(args[1])]
+                if False in check:
                     print('Incorrect argument:', args , file=sys.stderr)  
                     sys.exit(22)
                 else: 
@@ -135,49 +133,54 @@ def checkArguments(name, args):
 
         case 3:
             if name in ('jumpifeq', 'jumpifneq'):               # <label><symb1><symb2>
-                if not isLabel(args[0]) or not isSymb(args[1]) or not isSymb(args[2]):
+                check = [isLabel(args[0]), isSymb(args[1]), isSymb(args[2])]
+                if False in check:
                     print('Incorrect argument:', args , file=sys.stderr)  
                     sys.exit(22)
                 else: 
                     print("OK")
             else:                                               # <var><symb1><symb2>       'add', 'sub', 'mul', 'idiv', 'lt', 'gt', 'eq', 'and', 'or', 'not', 'stri2int', 'concat', 'getchar', 'setchar'
-                if not isVar(args[0]) or not isSymb(args[1]) or not isSymb(args[2]):
+                check = [isVar(args[0]), isSymb(args[1]), isSymb(args[2])]
+                if False in check:
                     print('Incorrect argument:', args , file=sys.stderr)  
                     sys.exit(22)
                 else: 
                     print("OK")
 
         # 4 ani default neni potreb, to je osetreno ve funkci checkInstructionArgsCount
+    return check
 
 
 # promenna GF/LF/TF@..., zacina specialnim znakem, nebo pismenem
 def isVar(arg):
     if '@' not in arg: return False
 
+    saved = arg
     arg = arg.split('@', 1)
     if arg[0] not in ('GF', 'LF', 'TF'): return False
     
-    if isValidName(arg[1]): return True
+    if isValidName(arg[1]): return ['var', saved]
     return False    
 
 # konstanta int,bool,...@..
 # muze byt i promenna
 def isSymb(arg):
     if '@' not in arg: return False
-    if isVar(arg): return True
+    var = isVar(arg)
+    if var != False: return var
 
     arg = arg.split('@', 1)
     match arg[0]:
         case 'int':
-            if isValidNum(arg[1]): return True
+            if isValidNum(arg[1]): return ['int', arg[1]]
             else: return False
         case 'bool':
-            if arg[1] in ('true', 'false'): return True
+            if arg[1] in ('true', 'false'): return ['bool', arg[1]]
             else: return False
         case 'string':
-            return True                                 #! ?????????????????????
+            return ['string', arg[1]]                                 #! ?????????????????????
         case 'nil':
-            if arg[1] == 'nil': return True
+            if arg[1] == 'nil': return ['nil', arg[1]]
             else: return False
         case _:
             return False
@@ -193,7 +196,7 @@ def isValidNum(num):
 
 # Pro citelnost
 def isLabel(arg):
-    return isValidName(arg)
+    if isValidName(arg): return ['label', arg]
 
 def isType(arg):
     return arg in ('int', 'string', 'bool')
@@ -205,6 +208,10 @@ def isValidName(name):
     for letter in name:
         if letter not in ('_', '-', '$', '&', '%', '*', '!', '?') and not letter.isalnum(): return False
     return True
+
+#TODO
+def checkString():
+    print("TODO")
 
 #=================================================================================================================
 
@@ -232,7 +239,8 @@ for line in sys.stdin:
 
 
 tree = ET.ElementTree(xmlRoot)
-tree.write('test.xml')
+# tree.write('test.xml')
+# ET.dump(tree)
 
 
 
