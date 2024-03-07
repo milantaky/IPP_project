@@ -1,5 +1,8 @@
 .IPPcode24
-createframe
+
+
+
+
 pushs GF@d
 pushs int@1
 call sksks
@@ -8,5 +11,5 @@ jump sksks
 
 move GF@ass int@1
 read GF@ass string
-jumpifeq klak GF@ass bool@true
+jumpifeq klak GF@ass int@1
 add GF@ass int@1 LF@JJJ
